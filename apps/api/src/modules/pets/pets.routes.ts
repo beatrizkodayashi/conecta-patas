@@ -1,8 +1,7 @@
 import { Router } from "express";
-import { Role, type Prisma } from "@conecta-patas/db";
+import { prisma, Role, type Prisma } from "@conecta-patas/db";
 import { z } from "zod";
 import { optionalAuth, requireAuth } from "../../middlewares/auth";
-import { prisma } from "@conecta-patas/db";
 import {
   booleanQuerySchema,
   petStatusSchema,

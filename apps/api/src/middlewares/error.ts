@@ -19,6 +19,10 @@ export function errorHandler(err: unknown, _req: Request, res: Response, _next: 
     return res.status(409).json({ error: "Registro duplicado" });
   }
 
+  if (err instanceof Prisma.PrismaClientInitializationError) {
+    return res.status(503).json({ error: "Banco de dados indisponivel" });
+  }
+
   console.error(err);
   return res.status(500).json({ error: "Erro interno" });
 }

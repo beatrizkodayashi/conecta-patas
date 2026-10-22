@@ -1,0 +1,250 @@
+{
+  "info": {
+    "name": "Conecta Patas API",
+    "description": "Backend do Conecta Patas. Faça login, copie o token para a variavel jwt e teste as demais rotas.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "jwt", "value": "" },
+    { "key": "petId", "value": "" },
+    { "key": "interestId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/health"
+      }
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login ONG",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ong@conectapatas.com\",\n  \"password\": \"senha123\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Login adotante",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"adotante@conectapatas.com\",\n  \"password\": \"senha123\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Cadastrar adotante",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"novo.adotante@conectapatas.com\",\n  \"password\": \"senha123\",\n  \"name\": \"Maria Silva\",\n  \"phone\": \"11977776666\",\n  \"address\": \"Rua A, 10\",\n  \"city\": \"Sao Paulo\",\n  \"residenceType\": \"CASA\",\n  \"hasChildren\": true,\n  \"hasElderly\": false,\n  \"hasAdults\": true,\n  \"hasOtherAnimals\": false,\n  \"routine\": \"Estudo e trabalho meio periodo\",\n  \"preferredSpecies\": \"CAO\",\n  \"preferredSize\": \"MEDIO\",\n  \"acceptsSpecialNeeds\": false\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/register/adopter"
+          }
+        },
+        {
+          "name": "Cadastrar ONG",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nova.ong@conectapatas.com\",\n  \"password\": \"senha123\",\n  \"name\": \"Amigos de Patas\",\n  \"cnpj\": \"98.765.432/0001-10\",\n  \"responsible\": \"Joao Pereira\",\n  \"phone\": \"11966665555\",\n  \"address\": \"Rua B, 20\",\n  \"city\": \"Sao Paulo\"\n}"
+            },
+            "url": "{{baseUrl}}/api/auth/register/ong"
+          }
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{jwt}}" }],
+            "url": "{{baseUrl}}/api/auth/me"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pets",
+      "item": [
+        {
+          "name": "Listar disponiveis",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{jwt}}" }],
+            "url": "{{baseUrl}}/api/pets?species=GATO&city=Sao Paulo"
+          }
+        },
+        {
+          "name": "Ver ficha",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{jwt}}" }],
+            "url": "{{baseUrl}}/api/pets/{{petId}}"
+          }
+        },
+        {
+          "name": "Cadastrar pet",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nina\",\n  \"species\": \"GATO\",\n  \"sex\": \"FEMEA\",\n  \"approximateAge\": \"1 ano\",\n  \"size\": \"PEQUENO\",\n  \"characteristics\": \"Brincalhona e sociavel\",\n  \"goodWithChildren\": true,\n  \"goodWithAnimals\": true,\n  \"specialNeeds\": false,\n  \"vaccinated\": true,\n  \"neutered\": true,\n  \"photos\": [\"https://placekitten.com/402/400\"],\n  \"city\": \"Sao Paulo\"\n}"
+            },
+            "url": "{{baseUrl}}/api/pets"
+          }
+        },
+        {
+          "name": "Atualizar status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"EM_ANALISE\"\n}"
+            },
+            "url": "{{baseUrl}}/api/pets/{{petId}}"
+          }
+        },
+        {
+          "name": "Arquivar pet",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{jwt}}" }],
+            "url": "{{baseUrl}}/api/pets/{{petId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Adotante",
+      "item": [
+        {
+          "name": "Meu perfil",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{jwt}}" }],
+            "url": "{{baseUrl}}/api/adopters/me"
+          }
+        },
+        {
+          "name": "Meus interesses",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{jwt}}" }],
+            "url": "{{baseUrl}}/api/adopters/me/interests"
+          }
+        }
+      ]
+    },
+    {
+      "name": "ONG",
+      "item": [
+        {
+          "name": "Painel",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{jwt}}" }],
+            "url": "{{baseUrl}}/api/ongs/me/dashboard"
+          }
+        },
+        {
+          "name": "Meus pets",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{jwt}}" }],
+            "url": "{{baseUrl}}/api/ongs/me/pets"
+          }
+        },
+        {
+          "name": "Interesses recebidos",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{jwt}}" }],
+            "url": "{{baseUrl}}/api/ongs/me/interests"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Interesses e mensagens",
+      "item": [
+        {
+          "name": "Manifestar interesse",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"petId\": \"{{petId}}\",\n  \"message\": \"Ola! Vi a ficha de saude e gostaria de adotar.\"\n}"
+            },
+            "url": "{{baseUrl}}/api/interests"
+          }
+        },
+        {
+          "name": "Ver interesse",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{jwt}}" }],
+            "url": "{{baseUrl}}/api/interests/{{interestId}}"
+          }
+        },
+        {
+          "name": "Aceitar interesse",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"ACEITO\"\n}"
+            },
+            "url": "{{baseUrl}}/api/interests/{{interestId}}"
+          }
+        },
+        {
+          "name": "Enviar mensagem",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{jwt}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Podemos agendar uma visita?\"\n}"
+            },
+            "url": "{{baseUrl}}/api/interests/{{interestId}}/messages"
+          }
+        }
+      ]
+    }
+  ]
+}

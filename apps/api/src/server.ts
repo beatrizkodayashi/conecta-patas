@@ -1,4 +1,3 @@
-import "./types/express";
 import { env } from "./env";
 import { app } from "./app";
 
