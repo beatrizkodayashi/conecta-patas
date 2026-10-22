@@ -1,0 +1,157 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADOTANTE
+  ONG
+}
+
+enum ResidenceType {
+  CASA
+  APARTAMENTO
+}
+
+enum Species {
+  CAO
+  GATO
+}
+
+enum Sex {
+  MACHO
+  FEMEA
+}
+
+enum Size {
+  PEQUENO
+  MEDIO
+  GRANDE
+}
+
+enum PetStatus {
+  DISPONIVEL
+  EM_ANALISE
+  ADOTADO
+  ARQUIVADO
+}
+
+enum InterestStatus {
+  PENDENTE
+  ACEITO
+  RECUSADO
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  role         Role
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  adopter      Adopter?
+  organization Organization?
+  messages     Message[]
+}
+
+model Adopter {
+  id                  String         @id @default(uuid())
+  userId              String         @unique
+  name                String
+  phone               String
+  address             String
+  city                String
+  residenceType       ResidenceType
+  hasChildren         Boolean        @default(false)
+  hasElderly          Boolean        @default(false)
+  hasAdults           Boolean        @default(true)
+  hasOtherAnimals     Boolean        @default(false)
+  otherAnimalsNote    String?
+  routine             String
+  preferredSpecies    Species?
+  preferredSize       Size?
+  preferredSex        Sex?
+  acceptsSpecialNeeds Boolean        @default(false)
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  interests Interest[]
+}
+
+model Organization {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  name        String
+  cnpj        String   @unique
+  responsible String
+  email       String
+  phone       String
+  address     String
+  city        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pets Pet[]
+}
+
+model Pet {
+  id               String    @id @default(uuid())
+  organizationId   String
+  name             String
+  species          Species
+  sex              Sex
+  approximateAge   String
+  size             Size
+  characteristics  String
+  goodWithChildren Boolean
+  goodWithAnimals  Boolean
+  specialNeeds     Boolean   @default(false)
+  specialNeedsNote String?
+  vaccinated       Boolean   @default(false)
+  neutered         Boolean   @default(false)
+  photos           String[]
+  city             String
+  status           PetStatus @default(DISPONIVEL)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  interests    Interest[]
+
+  @@index([status])
+  @@index([species, size, sex, city])
+}
+
+model Interest {
+  id        String         @id @default(uuid())
+  adopterId String
+  petId     String
+  status    InterestStatus @default(PENDENTE)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  adopter  Adopter   @relation(fields: [adopterId], references: [id], onDelete: Cascade)
+  pet      Pet       @relation(fields: [petId], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  @@unique([adopterId, petId])
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  interestId String
+  senderId   String
+  content    String
+  createdAt  DateTime @default(now())
+
+  interest Interest @relation(fields: [interestId], references: [id], onDelete: Cascade)
+  sender   User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+}
