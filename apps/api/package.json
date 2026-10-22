@@ -1,0 +1,9 @@
+{
+  "name": "@conecta-patas/api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts"
+  }
+}

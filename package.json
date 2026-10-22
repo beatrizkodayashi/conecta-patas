@@ -1,0 +1,18 @@
+{
+  "name": "conecta-patas",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @conecta-patas/api",
+    "db:generate": "npm run generate -w @conecta-patas/db",
+    "db:migrate": "npm run migrate -w @conecta-patas/db",
+    "db:seed": "npm run seed -w @conecta-patas/db",
+    "db:studio": "npm run studio -w @conecta-patas/db"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
