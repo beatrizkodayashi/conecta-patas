@@ -9,8 +9,10 @@
     "dev": "npm run dev -w @conecta-patas/api",
     "db:generate": "npm run generate -w @conecta-patas/db",
     "db:migrate": "npm run migrate -w @conecta-patas/db",
+    "db:migrate:deploy": "npm run migrate:deploy -w @conecta-patas/db",
     "db:seed": "npm run seed -w @conecta-patas/db",
-    "db:studio": "npm run studio -w @conecta-patas/db"
+    "db:studio": "npm run studio -w @conecta-patas/db",
+    "postinstall": "npm run db:generate"
   },
   "engines": {
     "node": ">=20"

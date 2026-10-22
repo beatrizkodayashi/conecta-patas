@@ -11,10 +11,15 @@
     "generate": "prisma generate",
     "migrate": "dotenv -e ../../.env -- prisma migrate dev",
     "seed": "dotenv -e ../../.env -- tsx prisma/seed.ts",
-    "studio": "dotenv -e ../../.env -- prisma studio"
+    "studio": "dotenv -e ../../.env -- prisma studio",
+    "migrate:deploy": "dotenv -e ../../.env -- prisma migrate deploy"
+  },
+  "prisma": {
+    "seed": "dotenv -e ../../.env -- tsx prisma/seed.ts"
   },
   "dependencies": {
-    "@prisma/client": "^6.16.3"
+    "@prisma/client": "^6.16.3",
+    "bcryptjs": "^3.0.2"
   },
   "devDependencies": {
     "dotenv-cli": "^10.0.0",
