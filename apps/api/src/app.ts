@@ -1,6 +1,8 @@
 import cors from "cors";
 import express from "express";
 import { errorHandler } from "./middlewares/error";
+import { authRouter } from "./modules/auth/auth.routes";
+import { adoptersRouter } from "./modules/adopters/adopters.routes";
 
 export const app = express();
 
@@ -10,6 +12,9 @@ app.use(express.json());
 app.get("/health", (_req, res) => {
   res.json({ ok: true, service: "conecta-patas-api" });
 });
+
+app.use("/api/auth", authRouter);
+app.use("/api/adopters", adoptersRouter);
 
 app.use((_req, res) => {
   res.status(404).json({ error: "Rota nao encontrada" });
