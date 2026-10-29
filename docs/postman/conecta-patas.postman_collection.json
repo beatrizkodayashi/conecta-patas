@@ -1,14 +1,14 @@
 {
   "info": {
     "name": "Conecta Patas API",
-    "description": "Backend do Conecta Patas. Faça login, copie o token para a variavel jwt e teste as demais rotas.",
+    "description": "Backend no banco Neon da colaboradora (ong, cliente, pet, adocao). Depois do login, copie o token para jwt.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     { "key": "baseUrl", "value": "http://localhost:3000" },
     { "key": "jwt", "value": "" },
-    { "key": "petId", "value": "" },
-    { "key": "interestId", "value": "" }
+    { "key": "petId", "value": "1" },
+    { "key": "interestId", "value": "1" }
   ],
   "item": [
     {
@@ -28,7 +28,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"ong@conectapatas.com\",\n  \"password\": \"senha123\"\n}"
+              "raw": "{\n  \"email\": \"contato@patinhasfelizes.org\",\n  \"password\": \"senha123\"\n}"
             },
             "url": "{{baseUrl}}/api/auth/login"
           }
@@ -40,7 +40,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"adotante@conectapatas.com\",\n  \"password\": \"senha123\"\n}"
+              "raw": "{\n  \"email\": \"maria.silva@email.com\",\n  \"password\": \"senha123\"\n}"
             },
             "url": "{{baseUrl}}/api/auth/login"
           }
@@ -52,7 +52,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"novo.adotante@conectapatas.com\",\n  \"password\": \"senha123\",\n  \"name\": \"Maria Silva\",\n  \"phone\": \"11977776666\",\n  \"address\": \"Rua A, 10\",\n  \"city\": \"Sao Paulo\",\n  \"residenceType\": \"CASA\",\n  \"hasChildren\": true,\n  \"hasElderly\": false,\n  \"hasAdults\": true,\n  \"hasOtherAnimals\": false,\n  \"routine\": \"Estudo e trabalho meio periodo\",\n  \"preferredSpecies\": \"CAO\",\n  \"preferredSize\": \"MEDIO\",\n  \"acceptsSpecialNeeds\": false\n}"
+              "raw": "{\n  \"email\": \"novo.adotante@conectapatas.com\",\n  \"password\": \"senha123\",\n  \"cpf\": \"999.999.999-99\",\n  \"nome\": \"Beatriz Teste\",\n  \"telefone\": \"(11) 98888-7777\",\n  \"endereco\": \"Rua A, 10\",\n  \"cidade\": \"Sao Paulo\",\n  \"tipoResidencia\": \"Casa\",\n  \"temCriancas\": true,\n  \"temIdosos\": false,\n  \"temAdultos\": true,\n  \"temOutrosAnimais\": false,\n  \"rotina\": \"Estudo e trabalho meio periodo\",\n  \"especiePreferida\": \"Cachorro\",\n  \"portePreferido\": \"Médio\",\n  \"aceitaNecessidadesEspeciais\": false\n}"
             },
             "url": "{{baseUrl}}/api/auth/register/adopter"
           }
@@ -64,7 +64,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"nova.ong@conectapatas.com\",\n  \"password\": \"senha123\",\n  \"name\": \"Amigos de Patas\",\n  \"cnpj\": \"98.765.432/0001-10\",\n  \"responsible\": \"Joao Pereira\",\n  \"phone\": \"11966665555\",\n  \"address\": \"Rua B, 20\",\n  \"city\": \"Sao Paulo\"\n}"
+              "raw": "{\n  \"email\": \"nova.ong@conectapatas.com\",\n  \"password\": \"senha123\",\n  \"cnpjOng\": \"98.765.432/0001-10\",\n  \"nomeOng\": \"Amigos de Patas\",\n  \"responsavel\": \"Joao Pereira\",\n  \"telefone\": \"(11) 96666-5555\",\n  \"endereco\": \"Rua B, 20\",\n  \"cidade\": \"Sao Paulo\"\n}"
             },
             "url": "{{baseUrl}}/api/auth/register/ong"
           }
@@ -87,7 +87,7 @@
           "request": {
             "method": "GET",
             "header": [{ "key": "Authorization", "value": "Bearer {{jwt}}" }],
-            "url": "{{baseUrl}}/api/pets?species=GATO&city=Sao Paulo"
+            "url": "{{baseUrl}}/api/pets?tipoAnimal=Gato&cidade=Sao Paulo"
           }
         },
         {
@@ -108,7 +108,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Nina\",\n  \"species\": \"GATO\",\n  \"sex\": \"FEMEA\",\n  \"approximateAge\": \"1 ano\",\n  \"size\": \"PEQUENO\",\n  \"characteristics\": \"Brincalhona e sociavel\",\n  \"goodWithChildren\": true,\n  \"goodWithAnimals\": true,\n  \"specialNeeds\": false,\n  \"vaccinated\": true,\n  \"neutered\": true,\n  \"photos\": [\"https://placekitten.com/402/400\"],\n  \"city\": \"Sao Paulo\"\n}"
+              "raw": "{\n  \"nomePet\": \"Nina\",\n  \"tipoAnimal\": \"Gato\",\n  \"sexo\": \"Femea\",\n  \"idadeAprox\": \"1 ano\",\n  \"porte\": \"Pequeno\",\n  \"historico\": \"Brincalhona e sociavel\",\n  \"bomComCriancas\": true,\n  \"bomComAnimais\": true,\n  \"necessidadesEspeciais\": false,\n  \"vacinado\": true,\n  \"castrado\": true,\n  \"fotoUrl\": \"https://placekitten.com/402/400\",\n  \"cidade\": \"Sao Paulo\"\n}"
             },
             "url": "{{baseUrl}}/api/pets"
           }
@@ -123,7 +123,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"status\": \"EM_ANALISE\"\n}"
+              "raw": "{\n  \"statusAdocao\": \"Em análise\"\n}"
             },
             "url": "{{baseUrl}}/api/pets/{{petId}}"
           }
@@ -201,7 +201,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"petId\": \"{{petId}}\",\n  \"message\": \"Ola! Vi a ficha de saude e gostaria de adotar.\"\n}"
+              "raw": "{\n  \"idAnimal\": 1,\n  \"message\": \"Ola! Vi a ficha de saude e gostaria de adotar.\"\n}"
             },
             "url": "{{baseUrl}}/api/interests"
           }
@@ -215,7 +215,7 @@
           }
         },
         {
-          "name": "Aceitar interesse",
+          "name": "Concluir adocao",
           "request": {
             "method": "PATCH",
             "header": [
@@ -224,7 +224,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"status\": \"ACEITO\"\n}"
+              "raw": "{\n  \"statusAdocao\": \"Concluída\"\n}"
             },
             "url": "{{baseUrl}}/api/interests/{{interestId}}"
           }
@@ -239,7 +239,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"content\": \"Podemos agendar uma visita?\"\n}"
+              "raw": "{\n  \"conteudo\": \"Podemos agendar uma visita?\"\n}"
             },
             "url": "{{baseUrl}}/api/interests/{{interestId}}/messages"
           }
