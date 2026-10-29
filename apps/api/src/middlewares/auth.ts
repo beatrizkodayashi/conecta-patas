@@ -1,16 +1,15 @@
 import type { NextFunction, Request, Response } from "express";
-import type { Role } from "@conecta-patas/db";
 import jwt from "jsonwebtoken";
 import { env } from "../env";
 import { HttpError } from "../lib/http-error";
 
 type TokenPayload = {
-  id: string;
+  id: number;
   email: string;
-  role: Role;
+  role: "CLIENTE" | "ONG";
 };
 
-export function requireAuth(roles?: Role[]) {
+export function requireAuth(roles?: Array<"CLIENTE" | "ONG">) {
   return (req: Request, _res: Response, next: NextFunction) => {
     try {
       const header = req.headers.authorization;
@@ -21,7 +20,7 @@ export function requireAuth(roles?: Role[]) {
       const token = header.slice("Bearer ".length);
       const payload = jwt.verify(token, env.jwtSecret) as TokenPayload;
       req.user = {
-        id: payload.id,
+        id: Number(payload.id),
         email: payload.email,
         role: payload.role,
       };
@@ -52,7 +51,7 @@ export function optionalAuth(req: Request, _res: Response, next: NextFunction) {
     const token = header.slice("Bearer ".length);
     const payload = jwt.verify(token, env.jwtSecret) as TokenPayload;
     req.user = {
-      id: payload.id,
+      id: Number(payload.id),
       email: payload.email,
       role: payload.role,
     };

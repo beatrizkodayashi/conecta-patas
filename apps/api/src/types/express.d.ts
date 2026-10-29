@@ -1,12 +1,10 @@
-import type { Role } from "@conecta-patas/db";
-
 declare global {
   namespace Express {
     interface Request {
       user?: {
-        id: string;
+        id: number;
         email: string;
-        role: Role;
+        role: "CLIENTE" | "ONG";
       };
     }
   }

@@ -1,68 +1,81 @@
 import { Router } from "express";
-import { prisma, Role, type Prisma } from "@conecta-patas/db";
+import { prisma, type Prisma } from "@conecta-patas/db";
 import { z } from "zod";
 import { optionalAuth, requireAuth } from "../../middlewares/auth";
+import { parseId } from "../../lib/ids";
 import {
   booleanQuerySchema,
-  petStatusSchema,
-  sexSchema,
-  sizeSchema,
-  speciesSchema,
+  especieSchema,
+  porteSchema,
+  sexoSchema,
+  statusPetSchema,
 } from "../../lib/schemas";
 import { archiveOwnPet, createPet, getPetById, listAvailablePets, updateOwnPet } from "./pets.service";
 
 export const petsRouter = Router();
 
 const listQuerySchema = z.object({
-  species: speciesSchema.optional(),
-  size: sizeSchema.optional(),
-  sex: sexSchema.optional(),
-  city: z.string().min(2).optional(),
-  goodWithChildren: booleanQuerySchema,
-  goodWithAnimals: booleanQuerySchema,
-  specialNeeds: booleanQuerySchema,
+  tipoAnimal: especieSchema.optional(),
+  porte: porteSchema.optional(),
+  sexo: sexoSchema.optional(),
+  cidade: z.string().min(2).optional(),
+  bomComCriancas: booleanQuerySchema,
+  bomComAnimais: booleanQuerySchema,
+  necessidadesEspeciais: booleanQuerySchema,
 });
 
 const createPetSchema = z.object({
-  name: z.string().min(1),
-  species: speciesSchema,
-  sex: sexSchema,
-  approximateAge: z.string().min(1),
-  size: sizeSchema,
-  characteristics: z.string().min(3),
-  goodWithChildren: z.boolean(),
-  goodWithAnimals: z.boolean(),
-  specialNeeds: z.boolean().default(false),
-  specialNeedsNote: z.string().optional(),
-  vaccinated: z.boolean().default(false),
-  neutered: z.boolean().default(false),
-  photos: z.array(z.string()).default([]),
-  city: z.string().min(2),
+  nomePet: z.string().min(1),
+  tipoAnimal: especieSchema,
+  sexo: sexoSchema,
+  idadeAprox: z.string().min(1),
+  porte: porteSchema,
+  historico: z.string().min(3),
+  bomComCriancas: z.boolean(),
+  bomComAnimais: z.boolean(),
+  necessidadesEspeciais: z.boolean().default(false),
+  obsNecessidades: z.string().optional(),
+  vacinado: z.boolean().default(false),
+  castrado: z.boolean().default(false),
+  microchipado: z.boolean().default(false),
+  fotoUrl: z.string().optional(),
+  cidade: z.string().min(2),
 });
 
 const updatePetSchema = createPetSchema.partial().extend({
-  status: petStatusSchema.optional(),
+  statusAdocao: statusPetSchema.optional(),
 });
 
 petsRouter.get("/", optionalAuth, async (req, res, next) => {
   try {
     const query = listQuerySchema.parse(req.query);
     const filters: Prisma.PetWhereInput = {
-      ...(query.species ? { species: query.species } : {}),
-      ...(query.size ? { size: query.size } : {}),
-      ...(query.sex ? { sex: query.sex } : {}),
-      ...(query.city ? { city: { equals: query.city, mode: "insensitive" } } : {}),
-      ...(query.goodWithChildren !== undefined ? { goodWithChildren: query.goodWithChildren } : {}),
-      ...(query.goodWithAnimals !== undefined ? { goodWithAnimals: query.goodWithAnimals } : {}),
-      ...(query.specialNeeds !== undefined ? { specialNeeds: query.specialNeeds } : {}),
+      ...(query.tipoAnimal
+        ? query.tipoAnimal === "Cao" || query.tipoAnimal === "Cachorro"
+          ? { tipoAnimal: { in: ["Cao", "Cachorro"] } }
+          : { tipoAnimal: query.tipoAnimal }
+        : {}),
+      ...(query.porte ? { porte: query.porte } : {}),
+      ...(query.sexo ? { sexo: query.sexo } : {}),
+      ...(query.cidade ? { cidade: { equals: query.cidade, mode: "insensitive" } } : {}),
+      ...(query.bomComCriancas !== undefined ? { bomComCriancas: query.bomComCriancas } : {}),
+      ...(query.bomComAnimais !== undefined ? { bomComAnimais: query.bomComAnimais } : {}),
+      ...(query.necessidadesEspeciais !== undefined
+        ? { necessidadesEspeciais: query.necessidadesEspeciais }
+        : {}),
     };
 
-    const adopter =
-      req.user?.role === "ADOTANTE"
-        ? await prisma.adopter.findUnique({ where: { userId: req.user.id } })
+    const cliente =
+      req.user?.role === "CLIENTE"
+        ? (
+            await prisma.usuario.findUnique({
+              where: { id: req.user.id },
+              include: { cliente: true },
+            })
+          )?.cliente ?? null
         : null;
 
-    const pets = await listAvailablePets(filters, adopter);
+    const pets = await listAvailablePets(filters, cliente);
     res.json(pets);
   } catch (error) {
     next(error);
@@ -71,14 +84,14 @@ petsRouter.get("/", optionalAuth, async (req, res, next) => {
 
 petsRouter.get("/:id", optionalAuth, async (req, res, next) => {
   try {
-    const pet = await getPetById(req.params.id, req.user);
+    const pet = await getPetById(parseId(req.params.id), req.user);
     res.json(pet);
   } catch (error) {
     next(error);
   }
 });
 
-petsRouter.post("/", requireAuth([Role.ONG]), async (req, res, next) => {
+petsRouter.post("/", requireAuth(["ONG"]), async (req, res, next) => {
   try {
     const input = createPetSchema.parse(req.body);
     const pet = await createPet(req.user!.id, input);
@@ -88,19 +101,19 @@ petsRouter.post("/", requireAuth([Role.ONG]), async (req, res, next) => {
   }
 });
 
-petsRouter.patch("/:id", requireAuth([Role.ONG]), async (req, res, next) => {
+petsRouter.patch("/:id", requireAuth(["ONG"]), async (req, res, next) => {
   try {
     const input = updatePetSchema.parse(req.body);
-    const pet = await updateOwnPet(req.user!.id, req.params.id, input);
+    const pet = await updateOwnPet(req.user!.id, parseId(req.params.id), input);
     res.json(pet);
   } catch (error) {
     next(error);
   }
 });
 
-petsRouter.delete("/:id", requireAuth([Role.ONG]), async (req, res, next) => {
+petsRouter.delete("/:id", requireAuth(["ONG"]), async (req, res, next) => {
   try {
-    const pet = await archiveOwnPet(req.user!.id, req.params.id);
+    const pet = await archiveOwnPet(req.user!.id, parseId(req.params.id));
     res.json(pet);
   } catch (error) {
     next(error);

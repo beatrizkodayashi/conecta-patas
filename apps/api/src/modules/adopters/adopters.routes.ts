@@ -1,83 +1,93 @@
 import { Router } from "express";
-import { prisma, Role } from "@conecta-patas/db";
+import { prisma } from "@conecta-patas/db";
 import { z } from "zod";
 import { requireAuth } from "../../middlewares/auth";
 import { HttpError } from "../../lib/http-error";
-import { residenceTypeSchema, sexSchema, sizeSchema, speciesSchema } from "../../lib/schemas";
+import {
+  especieSchema,
+  porteSchema,
+  sexoSchema,
+  telefoneSchema,
+  tipoResidenciaSchema,
+} from "../../lib/schemas";
 
 export const adoptersRouter = Router();
 
 const updateAdopterSchema = z.object({
-  name: z.string().min(2).optional(),
-  phone: z.string().min(8).optional(),
-  address: z.string().min(3).optional(),
-  city: z.string().min(2).optional(),
-  residenceType: residenceTypeSchema.optional(),
-  hasChildren: z.boolean().optional(),
-  hasElderly: z.boolean().optional(),
-  hasAdults: z.boolean().optional(),
-  hasOtherAnimals: z.boolean().optional(),
-  otherAnimalsNote: z.string().nullable().optional(),
-  routine: z.string().min(3).optional(),
-  preferredSpecies: speciesSchema.nullable().optional(),
-  preferredSize: sizeSchema.nullable().optional(),
-  preferredSex: sexSchema.nullable().optional(),
-  acceptsSpecialNeeds: z.boolean().optional(),
+  nome: z.string().min(2).optional(),
+  telefone: telefoneSchema.optional(),
+  endereco: z.string().min(3).optional(),
+  cidade: z.string().min(2).optional(),
+  tipoResidencia: tipoResidenciaSchema.optional(),
+  temCriancas: z.boolean().optional(),
+  temIdosos: z.boolean().optional(),
+  temAdultos: z.boolean().optional(),
+  temOutrosAnimais: z.boolean().optional(),
+  obsOutrosAnimais: z.string().nullable().optional(),
+  rotina: z.string().min(3).optional(),
+  especiePreferida: especieSchema.nullable().optional(),
+  portePreferido: porteSchema.nullable().optional(),
+  sexoPreferido: sexoSchema.nullable().optional(),
+  aceitaNecessidadesEspeciais: z.boolean().optional(),
 });
 
-async function getAdopterOrThrow(userId: string) {
-  const adopter = await prisma.adopter.findUnique({
-    where: { userId },
+async function getClienteOrThrow(userId: number) {
+  const usuario = await prisma.usuario.findUnique({
+    where: { id: userId },
     include: {
-      interests: {
+      cliente: {
         include: {
-          pet: {
+          adocoes: {
             include: {
-              organization: {
-                select: { id: true, name: true, phone: true, city: true },
+              pet: {
+                include: {
+                  ong: {
+                    select: { cnpjOng: true, nomeOng: true, telefone: true, cidade: true },
+                  },
+                },
               },
             },
+            orderBy: { criadoEm: "desc" },
           },
         },
-        orderBy: { createdAt: "desc" },
       },
     },
   });
 
-  if (!adopter) {
+  if (!usuario?.cliente) {
     throw new HttpError(404, "Perfil de adotante nao encontrado");
   }
 
-  return adopter;
+  return usuario.cliente;
 }
 
-adoptersRouter.get("/me", requireAuth([Role.ADOTANTE]), async (req, res, next) => {
+adoptersRouter.get("/me", requireAuth(["CLIENTE"]), async (req, res, next) => {
   try {
-    const adopter = await getAdopterOrThrow(req.user!.id);
-    res.json(adopter);
+    const cliente = await getClienteOrThrow(req.user!.id);
+    res.json(cliente);
   } catch (error) {
     next(error);
   }
 });
 
-adoptersRouter.patch("/me", requireAuth([Role.ADOTANTE]), async (req, res, next) => {
+adoptersRouter.patch("/me", requireAuth(["CLIENTE"]), async (req, res, next) => {
   try {
     const input = updateAdopterSchema.parse(req.body);
-    const current = await getAdopterOrThrow(req.user!.id);
-    const adopter = await prisma.adopter.update({
-      where: { id: current.id },
+    const current = await getClienteOrThrow(req.user!.id);
+    const cliente = await prisma.cliente.update({
+      where: { cpf: current.cpf },
       data: input,
     });
-    res.json(adopter);
+    res.json(cliente);
   } catch (error) {
     next(error);
   }
 });
 
-adoptersRouter.get("/me/interests", requireAuth([Role.ADOTANTE]), async (req, res, next) => {
+adoptersRouter.get("/me/interests", requireAuth(["CLIENTE"]), async (req, res, next) => {
   try {
-    const adopter = await getAdopterOrThrow(req.user!.id);
-    res.json(adopter.interests);
+    const cliente = await getClienteOrThrow(req.user!.id);
+    res.json(cliente.adocoes);
   } catch (error) {
     next(error);
   }
