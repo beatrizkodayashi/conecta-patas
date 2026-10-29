@@ -4,154 +4,140 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
-enum Role {
-  ADOTANTE
-  ONG
+model Ong {
+  cnpjOng      String    @id @map("cnpj_ong")
+  nomeOng      String    @map("nome_ong")
+  email        String?
+  telefone     String?
+  endereco     String?
+  responsavel  String?
+  cidade       String?
+  criadoEm     DateTime? @default(now()) @map("criado_em")
+  atualizadoEm DateTime? @updatedAt @map("atualizado_em")
+
+  pets     Pet[]
+  adocoes  Adocao[]
+  usuarios Usuario[]
+
+  @@map("ong")
 }
 
-enum ResidenceType {
-  CASA
-  APARTAMENTO
-}
+model Cliente {
+  cpf                         String    @id
+  nome                        String
+  endereco                    String?
+  email                       String?
+  telefone                    String?
+  statusAdocao                String?   @map("status_adocao")
+  idAdocacao                  Int?      @map("id_adocacao")
+  cidade                      String?
+  tipoResidencia              String?   @map("tipo_residencia")
+  temCriancas                 Boolean   @default(false) @map("tem_criancas")
+  temIdosos                   Boolean   @default(false) @map("tem_idosos")
+  temAdultos                  Boolean   @default(true) @map("tem_adultos")
+  temOutrosAnimais            Boolean   @default(false) @map("tem_outros_animais")
+  obsOutrosAnimais            String?   @map("obs_outros_animais")
+  rotina                      String?
+  especiePreferida            String?   @map("especie_preferida")
+  portePreferido              String?   @map("porte_preferido")
+  sexoPreferido               String?   @map("sexo_preferido")
+  aceitaNecessidadesEspeciais Boolean   @default(false) @map("aceita_necessidades_especiais")
+  criadoEm                    DateTime? @default(now()) @map("criado_em")
+  atualizadoEm                DateTime? @updatedAt @map("atualizado_em")
 
-enum Species {
-  CAO
-  GATO
-}
+  adocaoRef Adocao?   @relation("ClienteAdocaoRef", fields: [idAdocacao], references: [idAdocao], onDelete: SetNull, onUpdate: Cascade)
+  adocoes   Adocao[]  @relation("AdocoesDoCliente")
+  usuarios  Usuario[]
 
-enum Sex {
-  MACHO
-  FEMEA
-}
-
-enum Size {
-  PEQUENO
-  MEDIO
-  GRANDE
-}
-
-enum PetStatus {
-  DISPONIVEL
-  EM_ANALISE
-  ADOTADO
-  ARQUIVADO
-}
-
-enum InterestStatus {
-  PENDENTE
-  ACEITO
-  RECUSADO
-}
-
-model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  passwordHash String
-  role         Role
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  adopter      Adopter?
-  organization Organization?
-  messages     Message[]
-}
-
-model Adopter {
-  id                  String         @id @default(uuid())
-  userId              String         @unique
-  name                String
-  phone               String
-  address             String
-  city                String
-  residenceType       ResidenceType
-  hasChildren         Boolean        @default(false)
-  hasElderly          Boolean        @default(false)
-  hasAdults           Boolean        @default(true)
-  hasOtherAnimals     Boolean        @default(false)
-  otherAnimalsNote    String?
-  routine             String
-  preferredSpecies    Species?
-  preferredSize       Size?
-  preferredSex        Sex?
-  acceptsSpecialNeeds Boolean        @default(false)
-  createdAt           DateTime       @default(now())
-  updatedAt           DateTime       @updatedAt
-
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  interests Interest[]
-}
-
-model Organization {
-  id          String   @id @default(uuid())
-  userId      String   @unique
-  name        String
-  cnpj        String   @unique
-  responsible String
-  email       String
-  phone       String
-  address     String
-  city        String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  pets Pet[]
+  @@index([idAdocacao], map: "idx_cliente_id_adocacao")
+  @@map("cliente")
 }
 
 model Pet {
-  id               String    @id @default(uuid())
-  organizationId   String
-  name             String
-  species          Species
-  sex              Sex
-  approximateAge   String
-  size             Size
-  characteristics  String
-  goodWithChildren Boolean
-  goodWithAnimals  Boolean
-  specialNeeds     Boolean   @default(false)
-  specialNeedsNote String?
-  vaccinated       Boolean   @default(false)
-  neutered         Boolean   @default(false)
-  photos           String[]
-  city             String
-  status           PetStatus @default(DISPONIVEL)
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  idAnimal              Int       @id @default(autoincrement()) @map("id_animal")
+  cnpjOng               String    @map("cnpj_ong")
+  porte                 String?
+  historico             String?
+  idadeAprox            String?   @map("idade_aprox")
+  tipoAnimal            String?   @map("tipo_animal")
+  castrado              Boolean?  @default(false)
+  microchipado          Boolean?  @default(false)
+  statusAdocao          String?   @default("Disponível") @map("status_adocao")
+  nomePet               String?   @map("nome_pet")
+  sexo                  String?
+  fotoUrl               String?   @map("foto_url")
+  cidade                String?
+  bomComCriancas        Boolean   @default(false) @map("bom_com_criancas")
+  bomComAnimais         Boolean   @default(false) @map("bom_com_animais")
+  necessidadesEspeciais Boolean   @default(false) @map("necessidades_especiais")
+  obsNecessidades       String?   @map("obs_necessidades")
+  vacinado              Boolean   @default(false)
+  criadoEm              DateTime? @default(now()) @map("criado_em")
+  atualizadoEm          DateTime? @updatedAt @map("atualizado_em")
 
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  interests    Interest[]
+  ong     Ong      @relation(fields: [cnpjOng], references: [cnpjOng], onDelete: Cascade, onUpdate: Cascade)
+  adocoes Adocao[]
 
-  @@index([status])
-  @@index([species, size, sex, city])
+  @@index([cnpjOng], map: "idx_pet_cnpj_ong")
+  @@index([statusAdocao], map: "idx_pet_status")
+  @@map("pet")
 }
 
-model Interest {
-  id        String         @id @default(uuid())
-  adopterId String
-  petId     String
-  status    InterestStatus @default(PENDENTE)
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
+model Adocao {
+  idAdocao     Int       @id @default(autoincrement()) @map("id_adocao")
+  idAnimal     Int       @map("id_animal")
+  cpf          String
+  cnpjOng      String    @map("cnpj_ong")
+  statusAdocao String?   @default("Pendente") @map("status_adocao")
+  criadoEm     DateTime? @default(now()) @map("criado_em")
+  atualizadoEm DateTime? @updatedAt @map("atualizado_em")
 
-  adopter  Adopter   @relation(fields: [adopterId], references: [id], onDelete: Cascade)
-  pet      Pet       @relation(fields: [petId], references: [id], onDelete: Cascade)
-  messages Message[]
+  pet            Pet        @relation(fields: [idAnimal], references: [idAnimal], onDelete: Cascade, onUpdate: Cascade)
+  cliente        Cliente    @relation("AdocoesDoCliente", fields: [cpf], references: [cpf], onDelete: Cascade, onUpdate: Cascade)
+  ong            Ong        @relation(fields: [cnpjOng], references: [cnpjOng], onDelete: Cascade, onUpdate: Cascade)
+  clientesComRef Cliente[]  @relation("ClienteAdocaoRef")
+  mensagens      Mensagem[]
 
-  @@unique([adopterId, petId])
+  @@index([idAnimal], map: "idx_adocao_id_animal")
+  @@index([cpf], map: "idx_adocao_cpf")
+  @@index([cnpjOng], map: "idx_adocao_cnpj_ong")
+  @@map("adocao")
 }
 
-model Message {
-  id         String   @id @default(uuid())
-  interestId String
-  senderId   String
-  content    String
-  createdAt  DateTime @default(now())
+model Usuario {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  senhaHash    String   @map("senha_hash")
+  papel        String
+  cpf          String?
+  cnpjOng      String?  @map("cnpj_ong")
+  criadoEm     DateTime @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
 
-  interest Interest @relation(fields: [interestId], references: [id], onDelete: Cascade)
-  sender   User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  cliente   Cliente?   @relation(fields: [cpf], references: [cpf], onDelete: Cascade, onUpdate: Cascade)
+  ong       Ong?       @relation(fields: [cnpjOng], references: [cnpjOng], onDelete: Cascade, onUpdate: Cascade)
+  mensagens Mensagem[]
+
+  @@unique([cpf])
+  @@unique([cnpjOng])
+  @@map("usuario")
+}
+
+model Mensagem {
+  id        Int      @id @default(autoincrement())
+  idAdocao  Int      @map("id_adocao")
+  idUsuario Int      @map("id_usuario")
+  conteudo  String
+  criadoEm  DateTime @default(now()) @map("criado_em")
+
+  adocao  Adocao  @relation(fields: [idAdocao], references: [idAdocao], onDelete: Cascade, onUpdate: Cascade)
+  usuario Usuario @relation(fields: [idUsuario], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([idAdocao])
+  @@map("mensagem")
 }
